@@ -4,12 +4,12 @@ letsrenew is a python script that is able to retrieve a certificate from a host,
 
 ## requirements
 
-Probably ''python3-openssl'' should be installed on your system. The provided binary has everything bundled.
-To use the build script you need ''pyinstaller'' and ''fpm''.
+Probably `python3-openssl` should be installed on your system. The provided binary has everything bundled.
+To use the build script you need `pyinstaller` and `fpm`.
 
 ## instructions
 
-The provided ''build.sh'' script should give you both a binary version as well as a debian package inside a ''dist'' directory.
+The provided `build.sh` script should give you both a binary version as well as a debian package inside a `dist` directory.
 
 ## usage
 ```
@@ -21,11 +21,11 @@ positional arguments:
   hostname              Hostname that will be requested from the webserver.
 
 optional arguments:
-  -h, --help            show this help message and exit
+  -h, --help            show this help message and exit.
   -a ADDRESS, --address ADDRESS
-                        Alternate address to connect (don't resolve the hostname).
+                        Alternate address to connect (to circumvent proxies, balancers, etc...).
   -p PORT, --port PORT  Alternate port to connect to.
-  -j, --json            Output in JSON fromat.
+  -j, --json            Output in JSON format.
   -l ALERT, --alert ALERT
                         Output only on alerts. Specify it as the validity threshold in days. 0 for
                         Always output (default).

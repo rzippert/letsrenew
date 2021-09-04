@@ -100,11 +100,11 @@ def parse_arguments():
     parser.add_argument("hostname",
                         action="store", help="Hostname that will be requested from the webserver.")
     parser.add_argument("-a", "--address",
-                        action="store", required=False, help="Alternate address to connect (don't resolve the hostname).")
+                        action="store", required=False, help="Alternate address to connect (to circumvent proxies, balancers, etc...).")
     parser.add_argument("-p", "--port", default=443, type=int,
                         action="store", required=False, help="Alternate port to connect to.")
     parser.add_argument("-j", "--json", default=False,
-                        action="store_true", required=False, help="Output in JSON fromat.")
+                        action="store_true", required=False, help="Output in JSON format.")
     parser.add_argument("-l", "--alert", default=0, type=int,
                         action="store", required=False, help="Output only on alerts. Specify it as the validity threshold in days. 0 for Always output (default).")
 
