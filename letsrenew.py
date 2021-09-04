@@ -3,17 +3,18 @@
 
 from socket import socket
 from OpenSSL import SSL
-#from OpenSSL import crypto
 from datetime import datetime
 import idna
 from cryptography import x509
 from cryptography.x509.oid import NameOID 
+import argparse
+import json
 
 """Let's Renew main file"""
 
 class cert:
     """Represents a certificate and its data"""
-    def __init__(self, host, port=443, check_address=None):
+    def __init__(self, host, port=443, check_address=None, threshold=0):
         """As a minimum, a host has te be provided as the cert is instantiated"""
         self.host = host
         self.port = port
@@ -21,21 +22,49 @@ class cert:
         self.cert = None
         self.certsan = None
         self.certisuer = None
+        self.threshold = threshold
+        self.alert = False
+
         self.get_cert()
-        self.read_cert()
+
 
     def read_cert(self):
         try:
             self.certsan = self.cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
             self.certissuer = self.cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)
-
+            self.CN = self.cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+            self.SAN = self.certsan.value.get_values_for_type(x509.DNSName)
+            self.notAfter = self.cert.not_valid_after
         except SSL.Error as e:
             print('Parse Error: {0}'.format(str(e)))
             exit(1)
+        self.verify_cert()
+    
+    def verify_cert(self):
+        if self.threshold >= int((self.notAfter - datetime.now()).total_seconds() / 86400):
+            self.alert = True
+        elif self.threshold == 0:
+            self.alert = True
+    
+    def get_dict(self):
+        selfdict = {"CN": self.CN,
+                    "SAN": self.SAN,
+                    "NotAfter": str(self.notAfter),
+                    "DaysToExpire": int((self.notAfter - datetime.now()).total_seconds() / 86400),
+                    "Issuer": self.certissuer[0].value }
+        return selfdict
+
+    def get_json(self):
+        return json.dumps(self.get_dict())
+
+    def json(self):
+        if self.alert is True:
+            print(self.get_json())
 
     def print(self):
-        print(f'CN="{self.cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value}" SAN={self.certsan.value.get_values_for_type(x509.DNSName)} NotAfter="{self.cert.not_valid_after}"')
-        print(f'  TimeToExpire="{self.cert.not_valid_after - datetime.now()}" Issuer="{self.certissuer[0].value}"')
+        if self.alert is True:
+            print(f'CN="{self.CN}" SAN={self.SAN} NotAfter="{self.notAfter}"')
+            print(f'  TimeToExpire="{self.notAfter - datetime.now()}" Issuer="{self.certissuer[0].value}"')
 
     def get_cert(self):
         hostidna = idna.encode(self.host)
@@ -61,12 +90,60 @@ class cert:
             print(f'Download error: {str(e)}')
             exit(0)
 
+        self.read_cert()
 
 
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(prog="letsrenew", epilog="Author: Renato Zippert",
+                                     description="Actively tracks short lived certificates (like those from Let's Encrypt) for renewal failures.")
+    parser.add_argument("hostname",
+                        action="store", help="Hostname that will be requested from the webserver.")
+    parser.add_argument("-a", "--address",
+                        action="store", required=False, help="Alternate address to connect (don't resolve the hostname).")
+    parser.add_argument("-p", "--port", default=443, type=int,
+                        action="store", required=False, help="Alternate port to connect to.")
+    parser.add_argument("-j", "--json", default=False,
+                        action="store_true", required=False, help="Output in JSON fromat.")
+    parser.add_argument("-l", "--alert", default=0, type=int,
+                        action="store", required=False, help="Output only on alerts. Specify it as the validity threshold in days. 0 for Always output (default).")
+
+    userArguments = parser.parse_args()
+    configs = dict()
+
+    configs["address"] = None
+    configs["port"] = None
+    configs["json"] = None
+    configs["alert"] = None
+
+    configs["hostname"] = userArguments.hostname
+    if userArguments.address != None:
+        configs["address"] = userArguments.address
+    if userArguments.port != None:
+        configs["port"] = userArguments.port
+    if userArguments.json != None:
+        configs["json"] = userArguments.json
+    if userArguments.alert != None:
+        configs["alert"] = userArguments.alert
+
+    return configs
+
+def main():
+    configs = parse_arguments()
+    checkcert = None
+    if configs["address"] != None:
+        checkcert = cert(host=configs["hostname"], port=configs["port"], check_address=configs["address"], threshold=configs["alert"])
+    else:
+        checkcert = cert(host=configs["hostname"], port=configs["port"], threshold=configs["alert"])
+    if configs["json"] is True:
+        checkcert.json()
+    else:
+        checkcert.print()
+
+main()
 
 #ideas
 #alert for less than 30 days left (failed automation)
-#print json for javascript dashboard
 #monitor unexpected renews (before schedule)
 #detect renew schedule (soonest and latest registered renew)
 #quick cert issue (dns validation, manual install)
