@@ -35,14 +35,14 @@ Author: Renato Zippert
 
 ## massrenew
 
-With this script you can monitor multiple certificates easily and customize your report. I'm providing here an example of a very simple script that will check if the remaining validity of the certs is 29 days or lower (a time when it typically should have been renewed in Let's Encrypt terms). This way you can detect the failure quickly and act on it:
+With this example script you can monitor multiple certificates easily and customize your report. This checks if the validity of the certs is 29 days or lower (a time when it typically should have been renewed in Let's Encrypt terms) and then sends the certificate data via telegram somewhere (could be a group, where multiple people receive the alert). This way you can detect the failure quickly and act on it:
 
 ```
 #!/bin/bash
 
 function checktotelegram () {
 	CHECKRESULT="$(letsrenew $@)"
-	if [[ "$(echo $CHECKRESULT | wc -l)" -ne 0 ]]
+	if [[ "$(echo $CHECKRESULT | wc -c)" -gt 1 ]]
 	then
 		echo $CHECKRESULT | telegram-send --stdin
 	fi
