@@ -66,6 +66,7 @@ I don't want to call this a roadmap, as I'll struggle a lot to work on these fea
     * detect renew schedule (soonest and latest registered renewal)
     * monitor CA transparency logs
     * monitor CA changes
+    * web dashboard!
   * quick local acme cert issue (emergency button)
   * check if the certificate matches the requested host
   * check both the redirected and unredirected addresses (auto detect front server)
