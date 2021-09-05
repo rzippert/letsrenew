@@ -57,6 +57,24 @@ checktotelegram "acme.sh" -l 29
 checktotelegram "letsencrypt.org" -l 29
 ```
 
+## ideas
+
+I don't want to call this a roadmap, as I'll struggle a lot to work on these features immediately, but here are some ideas to implement later:
+
+  * store renew data somehow (daemonize and add sqlite?)
+    * monitor unexpected renews (before schedule)
+    * detect renew schedule (soonest and latest registered renewal)
+    * monitor CA transparency logs
+    * monitor CA changes
+  * quick local acme cert issue (emergency button)
+  * check if the certificate matches the requested host
+  * check both the redirected and unredirected addresses (auto detect front server)
+  * check certificate chain
+  * test best TLS practices on server, like algorithms and configurations
+  * monitor different kinds of certificates (like VPN ones)
+  * check certificates from a directory/mass check files
+
+
 ## licence
 
 Copyright (C) 2021 Renato Rodrigues Zippert

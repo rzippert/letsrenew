@@ -143,7 +143,6 @@ def main():
 main()
 
 #ideas
-#alert for less than 30 days left (failed automation)
 #monitor unexpected renews (before schedule)
 #detect renew schedule (soonest and latest registered renew)
 #quick cert issue (dns validation, manual install)
@@ -155,5 +154,3 @@ main()
 #monitor VPN certs
 #monitor certs from folder
 #keylength keyalg best practices monitor
-
-#https://gist.github.com/gdamjan/55a8b9eec6cf7b771f92021d93b87b2c
